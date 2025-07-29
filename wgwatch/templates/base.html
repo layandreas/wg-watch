@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+{% comment %} 
+  On init:
+    - Get theme from local storage if available, otherwise use
+      initial value
+    - Set theme change watcher which sets the local storage theme to the selected
+      one
+    - Initial chart update such that chart colors reflect the theme after
+      initialisation is done
+{% endcomment %}
+<html x-data="{ theme: 'dark' }"
+      lang="en"
+      x-bind:data-theme="theme"
+      x-init="theme = ((localStorage.getItem('theme') || theme) === 'dark') ? 'dark' : 'light'; $watch('theme', value => localStorage.setItem('theme', value));$nextTick(() => { $store.chartsChangeThemeCallbackList.forEach(callback => callback()) });">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="rental prices" />
+    <meta name="description"
+          content="Comparison of rental prices for German cities" />
+    <title>
+      {% block title %}
+        WG Watch
+      {% endblock title %}
+    </title>
+    {% load static %}
+    <link href="{% static 'css/output.css' %}" rel="stylesheet" type="text/css" />
+    <script src="{% static 'js/alpine.min.js' %}" defer></script>
+    <script src="{% static 'js/chart.js' %}"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      document.addEventListener('alpine:init', () => {
+          Alpine.store('chartsChangeThemeCallbackList', []);
+      })      
+    </script>
+  </head>
+  <body tabindex="0" class="flex flex-col h-dvh w-screen">
+    <div class="navbar bg-base-300 shadow-sm">
+      <div class="navbar-start">
+        <div class="dropdown">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle m-1">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-5 w-5"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+          </div>
+          <ul tabindex="0"
+              class="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm">
+            <li>
+              <a onclick="document.activeElement.blur()" href="{% url 'home' %}">Dashboard</a>
+            </li>
+            <li>
+              <a onclick="document.activeElement.blur()" href="{% url 'about' %}">About</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="navbar-center">
+        <a href="{% url 'home' %}" class="btn btn-ghost text-xl">WG Watch</a>
+      </div>
+      <div class="navbar-end">
+        {% comment %}
+          On click:
+          - Toggle theme
+          - Update charts to reflect theme change
+        {% endcomment %}
+        <button @click="theme = (theme === 'dark') ? 'light' : 'dark'; $nextTick(() => { $store.chartsChangeThemeCallbackList.forEach(callback => callback()) });">
+          <template x-if="theme === 'dark'">
+            <div>
+              <svg id="sun"
+                   xmlns="http://www.w3.org/2000/svg"
+                   width="24"
+                   height="18"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentcolor"
+                   stroke-width="2"
+                   stroke-linecap="round"
+                   stroke-linejoin="round"
+                   class="m-4">
+                <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            </div>
+          </template>
+          <template x-if="theme === 'light'">
+            <div>
+              <svg id="moon"
+                   xmlns="http://www.w3.org/2000/svg"
+                   width="24"
+                   height="18"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentcolor"
+                   stroke-width="2"
+                   stroke-linecap="round"
+                   stroke-linejoin="round"
+                   class="m-4">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+              </svg>
+            </div>
+          </template>
+        </button>
+      </div>
+    </div>
+    <div class="flex justify-center items-center flex-grow pt-6 pb-6">
+      <div class="flex flex-col w-9/10">
+        {% block content %}
+        {% endblock content %}
+      </div>
+    </div>
+  </body>
+</html>

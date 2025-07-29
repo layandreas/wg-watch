@@ -1,0 +1,23 @@
+{
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "ruff.importStrategy": "fromEnvironment",
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "html.format.preserveNewLines": true,
+  // "files.associations": {
+  //     "*.html": "django-html"
+  // },
+  // "[django-html]": {
+  //     "editor.defaultFormatter": "batisteo.vscode-django"
+  // },
+  "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
+    "editor.defaultFormatter": "monosans.djlint"
+  },
+  "djlint.enableLinting": false
+}

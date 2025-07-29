@@ -1,0 +1,21 @@
+# Ignore everything
+*
+
+# Add folders
+!/data_prepper
+!/wgwatch
+!/scraper
+
+# Add files
+!/pyproject.toml
+!/uv.lock
+!/db.sqlite3
+!/manage.py
+!/entrypoint.sh
+!/staticfiles
+
+# Ignore these 
+**__pycache__
+**.mypy_cache
+**.DS_Store
+/wgwatch/static

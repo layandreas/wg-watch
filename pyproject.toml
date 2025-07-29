@@ -1,0 +1,31 @@
+[project]
+name = "django-tw"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "devtools>=0.12.2",
+    "django>=5.2.3",
+    "django-cotton>=2.1.3",
+    "django-csp>=4.0",
+    "playwright>=1.54.0",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "requests>=2.32.4",
+    "uvicorn>=0.35.0",
+    "whitenoise>=6.9.0",
+    "zendriver>=0.12.1",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs[compatible-mypy]>=5.2.2",
+    "djlint>=1.36.4",
+    "mypy>=1.17.0",
+    "ruff>=0.12.4",
+]
+
+[tool.ruff]
+line-length = 80

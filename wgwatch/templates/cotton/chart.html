@@ -1,0 +1,195 @@
+{% load dynamic_access %}
+<div class="flex flex-col gap-4 items-stretch">
+  <!-- Chart container -->
+  <!-- Landscape mobile will take full height of screen -->
+  <div class="relative h-[50vh] max-md:landscape:h-[100vh]">
+    <canvas id="main-{{ chart_id }}" width="800"></canvas>
+  </div>
+  <!-- Date select box -->
+  <select id="date-select-{{ chart_id }}" class="select w-full mb-4">
+    <option disabled>Pick a date</option>
+    {% for date in scrape_dates %}
+      <option value="{{ date }}" {% if forloop.first %}selected{% endif %}>{{ date }}</option>
+    {% endfor %}
+  </select>
+</div>
+<script type="text/javascript">
+  // Group data by date for quick access
+  var dataByDate{{ chart_id }} = {
+    {% for date in scrape_dates %}
+    '{{ date }}': {
+      offerTypes: [
+        {% for item in city_comparison_data %}
+          {% if item.scraped_date == date %}
+            '{{ item.offer_type }}',
+          {% endif %}
+        {% endfor %}
+      ],
+      city1Prices: [
+        {% for item in city_comparison_data %}
+          {% if item.scraped_date == date %}
+            {{ item|get_attr:col1|default:"null" }},
+          {% endif %}
+        {% endfor %}
+      ],
+      city2Prices: [
+        {% for item in city_comparison_data %}
+          {% if item.scraped_date == date %}
+            {{ item|get_attr:col2|default:"null" }},
+          {% endif %}
+        {% endfor %}
+      ]
+    },
+    {% endfor %}
+  };
+
+  var cityNames = [
+    {% for city in selected_cities %}
+      '{{ city }}',
+    {% endfor %}
+  ];
+
+  var ctx_{{ chart_id }} = document.getElementById('main-{{ chart_id }}').getContext('2d');
+  var chart_{{ chart_id }};
+
+  function updateChart{{ chart_id }}(selectedDate) {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const baseContentColor = rootStyles.getPropertyValue('--color-base-content').trim();
+    const baseColor300 = rootStyles.getPropertyValue('--color-base-300').trim();
+
+    var d = dataByDate{{chart_id}}[selectedDate];
+
+    if (!d) {
+      if (chart_{{ chart_id }}) {
+        chart_{{ chart_id }}.destroy();
+      }
+      chart = new Chart(ctx_{{ chart_id }}, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: []
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'No data available for ' + selectedDate,
+            }
+          }
+        }
+      });
+      return;
+    }
+
+    const config = {
+      type: 'bar',
+      data: {
+        labels: d.offerTypes,
+        datasets: [
+          {
+            label: cityNames[0],
+            backgroundColor: 'oklch(0.7445 0.1647 49.04 / 0.85)',
+            data: d.city1Prices
+          },
+          {
+            label: cityNames[1],
+            backgroundColor: 'oklch(0.6324 0.3379 306 / 84.71%)',
+            data: d.city2Prices
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: "{{ title }} " + '(' + selectedDate + ')',
+            color: baseContentColor
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            titleColor: baseContentColor,
+            bodyColor: baseContentColor,
+            footerColor: baseContentColor,
+            backgroundColor: baseColor300,
+          },
+          legend: {
+            position: 'top',
+            labels: {
+              color: baseContentColor
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: baseContentColor
+            },
+            title: {
+              display: true,
+              text: 'Offer Type',
+              color: baseContentColor
+            },
+            grid: {
+              color: 'oklch(0.4891 0 0 / 0.2)'
+            }
+          },
+          y: {
+            ticks: {
+              color: baseContentColor
+            },
+            title: {
+              display: true,
+              text: 'Average Price',
+              color: baseContentColor
+            },
+            grid: {
+              color: 'oklch(0.4891 0 0 / 0.2)'
+            }
+          }
+        }
+      }
+    }
+    
+
+    if (chart_{{ chart_id }}) {
+      chart_{{ chart_id }}.destroy();
+    }
+
+    chart_{{ chart_id }} = new Chart(ctx_{{ chart_id }}, config);
+  }
+
+  // On page load
+  var selectElement = document.getElementById('date-select-{{ chart_id }}');
+  updateChart{{ chart_id }}(selectElement.value);
+
+  // On change
+  selectElement.addEventListener('change', function () {
+    updateChart{{ chart_id }}(this.value);
+  });
+
+  // We need to reload chart on every theme change. This will be done
+  // by calling these chart reload callbacks in base.html by using
+  // this list
+  function updateChart{{ chart_id }}ThemeChangeCallback() {
+    updateChart{{ chart_id }}(selectElement.value);
+  }
+
+  document.addEventListener('alpine:init', () => {
+		Alpine.store('chartsChangeThemeCallbackList').push(
+      updateChart{{ chart_id }}ThemeChangeCallback
+    );
+  })
+
+  // Ensure tooltip on mobile disappears when tapping outside of canvas
+  // See https://github.com/chartjs/Chart.js/issues/7738#issuecomment-1523666989
+  document.addEventListener('touchend', function (event) {
+    if (event.target && event.target.tagName.toLowerCase() !== "canvas") {
+      chart_{{ chart_id }}.canvas.dispatchEvent(new Event('mouseout'));
+    }
+  });
+</script>

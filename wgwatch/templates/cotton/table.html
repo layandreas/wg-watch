@@ -1,0 +1,101 @@
+<!-- Info Type Select -->
+<div class="flex flex-col md:flex-row gap-4 mb-4 items-left">
+    <label>Show information:</label>
+    <select class="select select-sm" x-model="infoType">
+        <option value="price">Price</option>
+        <option value="number">Number of listings</option>
+        <option value="sqm_price">Avg. Price per m²</option>
+        <option value="sqm">Avg. Square meters</option>
+        <option value="all">All information</option>
+    </select>
+</div>
+<div class="overflow-x-auto w-full">
+    <table class="table table-zebra w-full text-sm">
+        <thead class="bg-base-200">
+            <tr>
+                <th>Scraping Date</th>
+                <th>Offer Type</th>
+                <!-- Price Columns -->
+                <th x-show="infoType === 'price' || infoType === 'all'">Average Price ({{ selected_cities.0 }})</th>
+                <th x-show="infoType === 'price' || infoType === 'all'">Average Price ({{ selected_cities.1 }})</th>
+                <!-- Listings Columns -->
+                <th x-show="infoType === 'number' || infoType === 'all'">Number of listings ({{ selected_cities.0 }})</th>
+                <th x-show="infoType === 'number' || infoType === 'all'">Number of listings ({{ selected_cities.1 }})</th>
+                <!-- Price per sqm Columns -->
+                <th x-show="infoType === 'sqm_price' || infoType === 'all'">Price per m² ({{ selected_cities.0 }})</th>
+                <th x-show="infoType === 'sqm_price' || infoType === 'all'">Price per m² ({{ selected_cities.1 }})</th>
+                <!-- Square meters Columns -->
+                <th x-show="infoType === 'sqm' || infoType === 'all'">Avg. m² ({{ selected_cities.0 }})</th>
+                <th x-show="infoType === 'sqm' || infoType === 'all'">Avg. m² ({{ selected_cities.1 }})</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in city_comparison_data %}
+                <tr>
+                    <td>{{ row.scraped_date }}</td>
+                    <td>{{ row.offer_type }}</td>
+                    <!-- Price Cells -->
+                    <td x-show="infoType === 'price' || infoType === 'all'">
+                        {% if row.avg_price_city_1 %}
+                            €{{ row.avg_price_city_1|floatformat:2 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td x-show="infoType === 'price' || infoType === 'all'">
+                        {% if row.avg_price_city_2 %}
+                            €{{ row.avg_price_city_2|floatformat:2 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <!-- Listings Cells -->
+                    <td x-show="infoType === 'number' || infoType === 'all'">
+                        {% if row.number_of_listings_city_1 %}
+                            {{ row.number_of_listings_city_1 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td x-show="infoType === 'number' || infoType === 'all'">
+                        {% if row.number_of_listings_city_2 %}
+                            {{ row.number_of_listings_city_2 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <!-- Price per sqm Cells -->
+                    <td x-show="infoType === 'sqm_price' || infoType === 'all'">
+                        {% if row.avg_price_per_square_meter_city_1 %}
+                            €{{ row.avg_price_per_square_meter_city_1|floatformat:2 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td x-show="infoType === 'sqm_price' || infoType === 'all'">
+                        {% if row.avg_price_per_square_meter_city_2 %}
+                            €{{ row.avg_price_per_square_meter_city_2|floatformat:2 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <!-- Avg. Square meters Cells -->
+                    <td x-show="infoType === 'sqm' || infoType === 'all'">
+                        {% if row.avg_square_meters_city_1 %}
+                            {{ row.avg_square_meters_city_1|floatformat:1 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td x-show="infoType === 'sqm' || infoType === 'all'">
+                        {% if row.avg_square_meters_city_2 %}
+                            {{ row.avg_square_meters_city_2|floatformat:1 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
