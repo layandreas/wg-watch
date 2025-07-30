@@ -25,7 +25,7 @@ def home(request):
         city_comparison_data = load_city_comparison_data(city1, city2)
 
     city_comparison_data_json = (
-        [item.model_dump() for item in city_comparison_data.data]
+        city_comparison_data.model_dump()["data"]
         if city_comparison_data
         else None
     )
