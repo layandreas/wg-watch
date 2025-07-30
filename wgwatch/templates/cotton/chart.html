@@ -47,12 +47,14 @@
     const rootStyles = getComputedStyle(document.documentElement);
     const baseContentColor = rootStyles.getPropertyValue('--color-base-content').trim();
     const baseColor300 = rootStyles.getPropertyValue('--color-base-300').trim();
+    const formattedDate = new Date(selectedDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
     const d = dataByDate{{ chart_id }}[selectedDate];
 
-    console.log("Updating");
-    console.log(selectedDate)
-    console.log(dataByDate{{ chart_id }});
     if (!d) {
       if (chart_{{ chart_id }}) {
         chart_{{ chart_id }}.destroy();
@@ -97,7 +99,7 @@
         plugins: {
           title: {
             display: true,
-            text: "{{ title }} " + '(' + selectedDate + ')',
+            text: "{{ title }} " + '(' + formattedDate + ')',
             color: baseContentColor
           },
           tooltip: {
