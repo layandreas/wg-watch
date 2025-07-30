@@ -9,45 +9,36 @@
   <select id="date-select-{{ chart_id }}" class="select w-full mb-4">
     <option disabled>Pick a date</option>
     {% for date in scrape_dates %}
-      <option value="{{ date }}" {% if forloop.first %}selected{% endif %}>{{ date }}</option>
+      <option value="{{ date|date:'Y-m-d' }}"
+              {% if forloop.first %}selected{% endif %}>{{ date|date:"F j, Y" }}</option>
     {% endfor %}
   </select>
 </div>
+<!-- Embed scrape_dates and city_comparison_data securely -->
+{% with "scrape-dates-"|add:chart_id as scrape_id %}{{ scrape_dates|json_script:scrape_id }}{% endwith %}
+{% with "comparison-data-"|add:chart_id as comp_id %}{{ city_comparison_data|json_script:comp_id }}{% endwith %}
+{% with "selected-cities-"|add:chart_id as city_id %}{{ selected_cities|json_script:city_id }}{% endwith %}
 <script type="text/javascript">
-  // Group data by date for quick access
-  var dataByDate{{ chart_id }} = {
-    {% for date in scrape_dates %}
-    '{{ date }}': {
-      offerTypes: [
-        {% for item in city_comparison_data %}
-          {% if item.scraped_date == date %}
-            '{{ item.offer_type }}',
-          {% endif %}
-        {% endfor %}
-      ],
-      city1Prices: [
-        {% for item in city_comparison_data %}
-          {% if item.scraped_date == date %}
-            {{ item|get_attr:col1|default:"null" }},
-          {% endif %}
-        {% endfor %}
-      ],
-      city2Prices: [
-        {% for item in city_comparison_data %}
-          {% if item.scraped_date == date %}
-            {{ item|get_attr:col2|default:"null" }},
-          {% endif %}
-        {% endfor %}
-      ]
-    },
-    {% endfor %}
-  };
+  // Load data from safely encoded JSON script tags
+  const scrapeDates{{ chart_id }} = JSON.parse(document.getElementById('scrape-dates-{{ chart_id }}').textContent);
+  const rawData{{ chart_id }} = JSON.parse(document.getElementById('comparison-data-{{ chart_id }}').textContent);
+  const cityNames{{ chart_id }} = JSON.parse(document.getElementById('selected-cities-{{ chart_id }}').textContent);
 
-  var cityNames = [
-    {% for city in selected_cities %}
-      '{{ city }}',
-    {% endfor %}
-  ];
+  // Group data by date for quick lookup
+  const dataByDate{{ chart_id }} = {};
+  rawData{{ chart_id }}.forEach(item => {
+    const date = item.scraped_date;
+    if (!dataByDate{{ chart_id }}[date]) {
+      dataByDate{{ chart_id }}[date] = {
+        offerTypes: [],
+        city1Prices: [],
+        city2Prices: []
+      };
+    }
+    dataByDate{{ chart_id }}[date].offerTypes.push(item.offer_type);
+    dataByDate{{ chart_id }}[date].city1Prices.push(item['{{ col1 }}'] ?? null);
+    dataByDate{{ chart_id }}[date].city2Prices.push(item['{{ col2 }}'] ?? null);
+  });
 
   var ctx_{{ chart_id }} = document.getElementById('main-{{ chart_id }}').getContext('2d');
   var chart_{{ chart_id }};
@@ -57,18 +48,18 @@
     const baseContentColor = rootStyles.getPropertyValue('--color-base-content').trim();
     const baseColor300 = rootStyles.getPropertyValue('--color-base-300').trim();
 
-    var d = dataByDate{{chart_id}}[selectedDate];
+    const d = dataByDate{{ chart_id }}[selectedDate];
 
+    console.log("Updating");
+    console.log(selectedDate)
+    console.log(dataByDate{{ chart_id }});
     if (!d) {
       if (chart_{{ chart_id }}) {
         chart_{{ chart_id }}.destroy();
-      }
-      chart = new Chart(ctx_{{ chart_id }}, {
+      } 
+      chart_{{ chart_id }} = new Chart(ctx_{{ chart_id }}, {
         type: 'bar',
-        data: {
-          labels: [],
-          datasets: []
-        },
+        data: { labels: [], datasets: [] },
         options: {
           responsive: true,
           maintainAspectRatio: false,
@@ -89,12 +80,12 @@
         labels: d.offerTypes,
         datasets: [
           {
-            label: cityNames[0],
+            label: cityNames{{ chart_id }}[0],
             backgroundColor: 'oklch(0.7445 0.1647 49.04 / 0.85)',
             data: d.city1Prices
           },
           {
-            label: cityNames[1],
+            label: cityNames{{ chart_id }}[1],
             backgroundColor: 'oklch(0.6324 0.3379 306 / 84.71%)',
             data: d.city2Prices
           }
@@ -126,40 +117,30 @@
         },
         scales: {
           x: {
-            ticks: {
-              color: baseContentColor
-            },
+            ticks: { color: baseContentColor },
             title: {
               display: true,
               text: 'Offer Type',
               color: baseContentColor
             },
-            grid: {
-              color: 'oklch(0.4891 0 0 / 0.2)'
-            }
+            grid: { color: 'oklch(0.4891 0 0 / 0.2)' }
           },
           y: {
-            ticks: {
-              color: baseContentColor
-            },
+            ticks: { color: baseContentColor },
             title: {
               display: true,
               text: 'Average Price',
               color: baseContentColor
             },
-            grid: {
-              color: 'oklch(0.4891 0 0 / 0.2)'
-            }
+            grid: { color: 'oklch(0.4891 0 0 / 0.2)' }
           }
         }
       }
-    }
-    
+    };
 
     if (chart_{{ chart_id }}) {
       chart_{{ chart_id }}.destroy();
     }
-
     chart_{{ chart_id }} = new Chart(ctx_{{ chart_id }}, config);
   }
 
@@ -172,24 +153,17 @@
     updateChart{{ chart_id }}(this.value);
   });
 
-  // We need to reload chart on every theme change. This will be done
-  // by calling these chart reload callbacks in base.html by using
-  // this list
   function updateChart{{ chart_id }}ThemeChangeCallback() {
     updateChart{{ chart_id }}(selectElement.value);
   }
 
   document.addEventListener('alpine:init', () => {
-		Alpine.store('chartsChangeThemeCallbackList').push(
-      updateChart{{ chart_id }}ThemeChangeCallback
-    );
-  })
+    Alpine.store('chartsChangeThemeCallbackList').push(updateChart{{ chart_id }}ThemeChangeCallback);
+  });
 
-  // Ensure tooltip on mobile disappears when tapping outside of canvas
-  // See https://github.com/chartjs/Chart.js/issues/7738#issuecomment-1523666989
   document.addEventListener('touchend', function (event) {
     if (event.target && event.target.tagName.toLowerCase() !== "canvas") {
-      chart_{{ chart_id }}.canvas.dispatchEvent(new Event('mouseout'));
+      chart_{{ chart_id }}?.canvas.dispatchEvent(new Event('mouseout'));
     }
   });
 </script>
