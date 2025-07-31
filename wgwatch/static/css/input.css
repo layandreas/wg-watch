@@ -234,8 +234,8 @@
 }
 
 .choices__list--multiple .choices__item.is-highlighted {
-	background-color: #004a5c;
-	border: 1px solid #003642
+	background-color: var(--color-secondary);
+	border: 1px solid var(--color-secondary)
 }
 
 .is-disabled .choices__list--multiple .choices__item {
@@ -252,9 +252,8 @@
 	background-color: var(--color-base-100);
 	border: 1px solid #ddd;
 	top: 100%;
-	margin-top: -1px;
-	border-bottom-left-radius: 2.5px;
-	border-bottom-right-radius: 2.5px;
+	margin-top: 3px;
+	border-radius: var(--radius-field);
 	overflow: hidden;
 	word-break: break-all
 }
