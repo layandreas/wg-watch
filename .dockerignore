@@ -5,6 +5,7 @@
 !/data_prepper
 !/wgwatch
 !/scraper
+!/input
 
 # Add files
 !/pyproject.toml

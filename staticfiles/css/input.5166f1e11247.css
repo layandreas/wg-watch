@@ -1,4 +1,4 @@
-@import "tailwindcss" source(none);
+@import url("tailwindcss.8c925bec7f6d") source(none);
 @plugin "./daisyui.js";
 @source "../../templates";
 @plugin "./daisyui-theme" {
