@@ -3,7 +3,10 @@ from datetime import date
 from typing import List
 
 from django.db import connection
+from jinja2 import Template
 from pydantic import BaseModel
+
+from .types import SelectedCities
 
 
 class CityComparisonItem(BaseModel):
@@ -28,84 +31,24 @@ class ScrapeDates(BaseModel):
     data: List[datetime.date]
 
 
-def load_city_comparison_data(city1: str, city2: str) -> CityComparisonData:
+def load_city_comparison_data(
+    selected_cities: SelectedCities,
+) -> CityComparisonData:
+    with open("input/sql/city_comparison.sql") as f:
+        raw_template = f.read()
+
+    template = Template(raw_template)
+    rendered_query = template.render(selected_cities=selected_cities.payload)
+
     with connection.cursor() as cursor:
-        cursor.execute(
-            """
-            with
-                city_1 as (
-                    select
-                        offer_type,
-                        date(job_insert_time) as scraped_date,
-                        avg(price) as avg_price,
-                        avg(square_meters) as avg_square_meters,
-                        avg(
-                            price
-                            / nullif(square_meters, 0)
-                        ) as avg_price_per_square_meter,
-                        count(*) as number_of_listings
-                    from
-                        latest_realestatelisting_per_day
-                    where
-                        address_locality = %s
-                    group by
-                        offer_type,
-                        date(job_insert_time)
-                    order by scraped_date desc, offer_type
-                ),
-                city_2 as (
-                    select
-                        offer_type,
-                        date(job_insert_time) as scraped_date,
-                        avg(price) as avg_price,
-                        avg(square_meters) as avg_square_meters,
-                        avg(
-                            price
-                            / nullif(square_meters, 0)
-                        ) as avg_price_per_square_meter,
-                        count(*) as number_of_listings
-                    from
-                        latest_realestatelisting_per_day
-                    where
-                        address_locality = %s
-                    group by
-                        offer_type,
-                        date(job_insert_time)
-                    order by scraped_date desc, offer_type
-                )
-            select
-                coalesce(
-                    c1.scraped_date,
-                    c2.scraped_date
-                ) as scraped_date,
-                coalesce(c1.offer_type, c2.offer_type) as offer_type,
-                c1.avg_price as avg_price_city_1,
-                c2.avg_price as avg_price_city_2,
-                c1.avg_square_meters as avg_square_meters_city_1,
-                c2.avg_square_meters as avg_square_meters_city_2,
-                c1.avg_price_per_square_meter as avg_price_per_square_meter_city_1,
-                c2.avg_price_per_square_meter as avg_price_per_square_meter_city_2,
-                c1.number_of_listings as number_of_listings_city_1,
-                c2.number_of_listings as number_of_listings_city_2
-
-            from city_1 as c1
-                full join city_2 as c2 on c1.scraped_date = c2.scraped_date
-                and c1.offer_type = c2.offer_type
-            ;
-        """,
-            [city1, city2],
-        )
-
+        cursor.execute(rendered_query)
         columns = [col[0] for col in cursor.description]
         rows = cursor.fetchall()
 
     # Combine columns and rows into a list of dictionaries (optional if easier in template)
     city_comparison_data = [dict(zip(columns, row)) for row in rows]
-    city_comparison_data_validated = CityComparisonData.model_validate(
-        {"data": city_comparison_data}
-    )
 
-    return city_comparison_data_validated
+    return city_comparison_data
 
 
 def load_scrape_dates() -> ScrapeDates:
@@ -129,4 +72,6 @@ def load_scrape_dates() -> ScrapeDates:
     scrape_dates = [row[0] for row in rows]
     scrape_dates_validated = ScrapeDates.model_validate({"data": scrape_dates})
 
+    return scrape_dates_validated
+    return scrape_dates_validated
     return scrape_dates_validated

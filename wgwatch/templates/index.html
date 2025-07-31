@@ -26,7 +26,10 @@
           {% endfor %}
         </select>
       </div>
-      <button type="submit" class="btn btn-soft btn-primary w-full">Submit</button>
+      <select id="citiesSelection" name="citiesSelection" multiple>
+        {% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn btn-soft btn-primary w-full my-4">Submit</button>
     </form>
     {% if selected_cities %}
       <div x-data="{ infoType: 'price' }">
@@ -44,4 +47,10 @@
       </div>
     {% endif %}
   </div>
+  <script>
+    const choices = new Choices('#citiesSelection', {
+      removeItemButton: true,
+      shouldSort: false,
+    });
+  </script>
 {% endblock content %}
