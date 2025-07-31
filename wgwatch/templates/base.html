@@ -24,13 +24,15 @@
     </title>
     {% load static %}
     <link href="{% static 'css/output.css' %}" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/scripts/choices.min.js"></script>
     <script src="{% static 'js/alpine.min.js' %}" defer></script>
     <script src="{% static 'js/chart.js' %}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
       document.addEventListener('alpine:init', () => {
           Alpine.store('chartsChangeThemeCallbackList', []);
-      })      
+      })
     </script>
   </head>
   <body tabindex="0" class="flex flex-col h-dvh w-screen">
