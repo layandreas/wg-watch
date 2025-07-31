@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
+  <!-- Embed scrape_dates and city_comparison_data securely -->
+  {% with "scrape-dates" as scrape_id %}{{ scrape_dates|json_script:scrape_id }}{% endwith %}
+  {% with "comparison-data" as comp_id %}{{ city_comparison_data|json_script:comp_id }}{% endwith %}
+  {% with "selected-cities" as city_id %}{{ selected_cities|json_script:city_id }}{% endwith %}
   <!-- Wrapper that will be replaced -->
   <div id="city-form-wrapper">
     <form method="get" class="w-full">
@@ -7,7 +11,10 @@
         <p class="text-center">Please select two cities from the dropdown menus below to compare rental prices.</p>
       </div>
       <select id="citiesSelection" name="citiesSelection" multiple>
-        {% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}
+        {% for city in cities %}
+          <option value="{{ city }}"
+                  {% if city in selected_cities %}selected{% endif %}>{{ city }}</option>
+        {% endfor %}
       </select>
       <button type="submit" class="btn btn-soft btn-primary w-full my-4">Submit</button>
     </form>
@@ -18,7 +25,7 @@
         <div class="w-full">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-10">
             <c-chart chart_id="1" col_prefix="avg_price" title="Rent by Offer Type" />
-            <c-chart chart_id="2" col_prefix="avg_price_per_square_meter" title="Rent by Offer Type" />
+            <c-chart chart_id="2" col_prefix="avg_price_per_square_meter" title="Rent/m² by Offer Type" />
           </div>
         </div>
         <!-- Table section -->

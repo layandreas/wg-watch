@@ -14,14 +14,10 @@
     {% endfor %}
   </select>
 </div>
-<!-- Embed scrape_dates and city_comparison_data securely -->
-{% with "scrape-dates-"|add:chart_id as scrape_id %}{{ scrape_dates|json_script:scrape_id }}{% endwith %}
-{% with "comparison-data-"|add:chart_id as comp_id %}{{ city_comparison_data|json_script:comp_id }}{% endwith %}
-{% with "selected-cities-"|add:chart_id as city_id %}{{ selected_cities|json_script:city_id }}{% endwith %}
 <script type="text/javascript">
-  const scrapeDates{{ chart_id }} = JSON.parse(document.getElementById('scrape-dates-{{ chart_id }}').textContent);
-  const rawData{{ chart_id }} = JSON.parse(document.getElementById('comparison-data-{{ chart_id }}').textContent);
-  const cityNames{{ chart_id }} = JSON.parse(document.getElementById('selected-cities-{{ chart_id }}').textContent);
+  const scrapeDates{{ chart_id }} = JSON.parse(document.getElementById('scrape-dates').textContent);
+  const rawData{{ chart_id }} = JSON.parse(document.getElementById('comparison-data').textContent);
+  const cityNames{{ chart_id }} = JSON.parse(document.getElementById('selected-cities').textContent);
 
   const dataByDate{{ chart_id }} = {};
   rawData{{ chart_id }}.forEach(item => {
