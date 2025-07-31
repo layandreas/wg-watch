@@ -5,6 +5,7 @@
   name: "dark";
   default: true;
   --color-primary: oklch(0.7445 0.1647 49.04);
+  --color-secondary: oklch(0.6324 0.3379 306);
   --color-base-100: oklch(0.1732 0.0388 238.66);
   --color-base-200: oklch(0.1532 0.0388 238.66);
   --color-base-300: oklch(0.1232 0.0388 238.66);
@@ -134,9 +135,8 @@
 .choices[data-type*=text] .choices__button {
 	position: relative;
 	display: inline-block;
-	margin: 0-4px 0 8px;
+	margin: 0-4px 0 2px;
 	padding-left: 16px;
-	border-left: 1px solid #003642;
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEiIGhlaWdodD0iMjEiIHZpZXdCb3g9IjAgMCAyMSAyMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjRkZGIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0yLjU5Mi4wNDRsMTguMzY0IDE4LjM2NC0yLjU0OCAyLjU0OEwuMDQ0IDIuNTkyeiIvPjxwYXRoIGQ9Ik0wIDE4LjM2NEwxOC4zNjQgMGwyLjU0OCAyLjU0OEwyLjU0OCAyMC45MTJ6Ii8+PC9nPjwvc3ZnPg==);
 	background-size: 8px;
 	width: 8px;
@@ -180,7 +180,7 @@
 }
 
 .is-flipped.is-open .choices__inner {
-	border-radius: 0 0 2.5px 2.5px
+	border-radius: var(--radius-field);
 }
 
 .choices__list {
@@ -211,14 +211,14 @@
 .choices__list--multiple .choices__item {
 	display: inline-block;
 	vertical-align: middle;
-	border-radius: 20px;
+	border-radius: var(--radius-selector);
 	padding: 4px 10px;
 	font-size: 12px;
 	font-weight: 500;
 	margin-right: 3.75px;
 	margin-bottom: 3.75px;
-	background-color: #005f75;
-	border: 1px solid #004a5c;
+	background-color: var(--color-primary);
+	border: 1px solid var(--color-primary);
 	color: #fff;
 	word-break: break-all;
 	box-sizing: border-box
