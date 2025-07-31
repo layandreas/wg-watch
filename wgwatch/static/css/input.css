@@ -165,13 +165,18 @@
 	overflow: hidden
 }
 
+
 .is-focused .choices__inner,
 .is-open .choices__inner {
-	border-color: #b7b7b7
+    outline: 2px solid;
+    outline-offset: 2px;
+	border-color: var(--color-base-content);
+    isolation: isolate;
+    border-radius: var(--radius-field);
 }
 
 .is-open .choices__inner {
-	border-radius: 2.5px 2.5px 0 0
+	border-radius: var(--radius-field);
 }
 
 .is-flipped.is-open .choices__inner {
