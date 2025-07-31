@@ -24,15 +24,19 @@ def home(request):
         selected_cities = [city1, city2]
         city_comparison_data = load_city_comparison_data(city1, city2)
 
+    city_comparison_data_json = (
+        city_comparison_data.model_dump()["data"]
+        if city_comparison_data
+        else None
+    )
+
     return render(
         request,
         "index.html",
         {
             "cities": cities,
             "selected_cities": selected_cities,
-            "city_comparison_data": (
-                city_comparison_data.data if city_comparison_data else None
-            ),
+            "city_comparison_data": city_comparison_data_json,
             "scrape_dates": scrape_dates.data,
         },
     )

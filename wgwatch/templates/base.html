@@ -66,7 +66,8 @@
           - Toggle theme
           - Update charts to reflect theme change
         {% endcomment %}
-        <button @click="theme = (theme === 'dark') ? 'light' : 'dark'; $nextTick(() => { $store.chartsChangeThemeCallbackList.forEach(callback => callback()) });">
+        <button class="cursor-pointer"
+                @click="theme = (theme === 'dark') ? 'light' : 'dark'; $nextTick(() => { $store.chartsChangeThemeCallbackList.forEach(callback => callback()) });">
           <template x-if="theme === 'dark'">
             <div>
               <svg id="sun"
