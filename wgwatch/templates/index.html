@@ -8,7 +8,7 @@
   <div id="city-form-wrapper">
     <form method="get" class="w-full">
       <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
-        <p class="text-center">Please select two cities from the dropdown menus below to compare rental prices.</p>
+        <p class="text-center">Please select one or more cities from the dropdown menus below to compare rental prices.</p>
       </div>
       <select id="citiesSelection" name="citiesSelection" multiple>
         {% for city in cities %}
@@ -38,6 +38,8 @@
     const choices = new Choices('#citiesSelection', {
       removeItemButton: true,
       shouldSort: false,
-    });
+      placeholder: true,
+      placeholderValue: 'Select cities...',
+      });
   </script>
 {% endblock content %}

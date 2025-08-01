@@ -8,9 +8,11 @@ from .types import SelectedCities
 
 @require_http_methods(["GET"])
 def home(request):
-    cities = RealEstateListing.objects.values_list(
-        "address_locality", flat=True
-    ).distinct()
+    cities = (
+        RealEstateListing.objects.values_list("address_locality", flat=True)
+        .distinct()
+        .order_by("address_locality")
+    )
 
     scrape_dates = load_scrape_dates()
 
