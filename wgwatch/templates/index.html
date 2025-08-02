@@ -1,32 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
+  <!-- Embed scrape_dates and city_comparison_data securely -->
+  {% with "scrape-dates" as scrape_id %}{{ scrape_dates|json_script:scrape_id }}{% endwith %}
+  {% with "comparison-data" as comp_id %}{{ city_comparison_data|json_script:comp_id }}{% endwith %}
+  {% with "selected-cities" as city_id %}{{ selected_cities|json_script:city_id }}{% endwith %}
   <!-- Wrapper that will be replaced -->
   <div id="city-form-wrapper">
     <form method="get" class="w-full">
       <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
-        <p class="text-center">Please select two cities from the dropdown menus below to compare rental prices.</p>
+        <p class="text-center">Please select one or more cities from the dropdown menus below to compare rental prices.</p>
       </div>
-      <div class="flex flex-col gap-y-4 md:flex-row md:gap-x-4 items-stretch mb-4">
-        <select name="city1" class="select w-full" required>
-          <option value=""
-                  disabled
-                  {% if not selected_cities or not selected_cities.0 %}selected{% endif %}>Pick a city</option>
-          {% for city in cities %}
-            <option value="{{ city }}"
-                    {% if selected_cities and city == selected_cities.0 %}selected{% endif %}>{{ city }}</option>
-          {% endfor %}
-        </select>
-        <select name="city2" class="select w-full" required>
-          <option value=""
-                  disabled
-                  {% if not selected_cities or not selected_cities.1 %}selected{% endif %}>Pick a city</option>
-          {% for city in cities %}
-            <option value="{{ city }}"
-                    {% if selected_cities and city == selected_cities.1 %}selected{% endif %}>{{ city }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="btn btn-soft btn-primary w-full">Submit</button>
+      <select id="citiesSelection" name="citiesSelection" multiple>
+        {% for city in cities %}
+          <option value="{{ city }}"
+                  {% if city in selected_cities %}selected{% endif %}>{{ city }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-soft btn-primary w-full my-4">Submit</button>
     </form>
     {% if selected_cities %}
       <div x-data="{ infoType: 'price' }">
@@ -34,8 +24,8 @@
         <div class="divider"></div>
         <div class="w-full">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-10">
-            <c-chart chart_id="1" col1="avg_price_city_1" col2="avg_price_city_2" title="Rent by Offer Type" />
-            <c-chart chart_id="2" col1="avg_price_per_square_meter_city_1" col2="avg_price_per_square_meter_city_2" title="Rent/m² by Offer Type" />
+            <c-chart chart_id="1" col_prefix="avg_price" title="Rent by Offer Type" />
+            <c-chart chart_id="2" col_prefix="avg_price_per_square_meter" title="Rent/m² by Offer Type" />
           </div>
         </div>
         <!-- Table section -->
@@ -44,4 +34,12 @@
       </div>
     {% endif %}
   </div>
+  <script>
+    const choices = new Choices('#citiesSelection', {
+      removeItemButton: true,
+      shouldSort: false,
+      placeholder: true,
+      placeholderValue: 'Select cities...',
+      });
+  </script>
 {% endblock content %}

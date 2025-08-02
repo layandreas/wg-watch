@@ -1,20 +1,3 @@
-@import "tailwindcss" source(none);
-@plugin "./daisyui.js";
-@source "../../templates";
-@plugin "./daisyui-theme" {
-  name: "dark";
-  default: true;
-  --color-primary: oklch(0.7445 0.1647 49.04);
-  --color-secondary: oklch(0.6324 0.3379 306);
-  --color-base-100: oklch(0.1732 0.0388 238.66);
-  --color-base-200: oklch(0.1532 0.0388 238.66);
-  --color-base-300: oklch(0.1232 0.0388 238.66);
-}
-/* Adjusting font sizes for better readability on mobile devices */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 .choices {
 	position: relative;
 	overflow: hidden;
@@ -168,12 +151,19 @@
 
 .is-focused .choices__inner,
 .is-open .choices__inner {
-    outline: 2px solid;
-    outline-offset: 2px;
 	border-color: var(--color-base-content);
     isolation: isolate;
     border-radius: var(--radius-field);
 }
+
+.is-focused {
+  border: 2px solid var(--color-base-content);
+  border-radius: calc(var(--radius-field) * 2);
+  margin: -2px;
+  padding: 2px; /* adjust offset */
+}
+
+
 
 .is-open .choices__inner {
 	border-radius: var(--radius-field);

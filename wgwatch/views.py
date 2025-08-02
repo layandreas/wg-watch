@@ -3,40 +3,41 @@ from django.views.decorators.http import require_http_methods
 
 from .dataloader import load_city_comparison_data, load_scrape_dates
 from .models import RealEstateListing
+from .types import SelectedCities
 
 
 @require_http_methods(["GET"])
 def home(request):
-    cities = RealEstateListing.objects.values_list(
-        "address_locality", flat=True
-    ).distinct()
+    cities = (
+        RealEstateListing.objects.values_list("address_locality", flat=True)
+        .distinct()
+        .order_by("address_locality")
+    )
 
     scrape_dates = load_scrape_dates()
 
     # Get selected cities from query params
-    city1 = request.GET.get("city1")
-    city2 = request.GET.get("city2")
-
-    selected_cities = None
+    selected_cities_validated = SelectedCities(
+        payload=request.GET.getlist("citiesSelection")
+    )
     city_comparison_data = None
 
-    if city1 and city2:
-        selected_cities = [city1, city2]
-        city_comparison_data = load_city_comparison_data(city1, city2)
-
-    city_comparison_data_json = (
-        city_comparison_data.model_dump()["data"]
-        if city_comparison_data
-        else None
-    )
+    if selected_cities_validated.payload:
+        city_comparison_data = load_city_comparison_data(
+            selected_cities_validated
+        )
 
     return render(
         request,
         "index.html",
         {
             "cities": cities,
-            "selected_cities": selected_cities,
-            "city_comparison_data": city_comparison_data_json,
+            "selected_cities": (
+                selected_cities_validated.payload
+                if selected_cities_validated
+                else None
+            ),
+            "city_comparison_data": city_comparison_data,
             "scrape_dates": scrape_dates.data,
         },
     )

@@ -14,30 +14,29 @@
     {% endfor %}
   </select>
 </div>
-<!-- Embed scrape_dates and city_comparison_data securely -->
-{% with "scrape-dates-"|add:chart_id as scrape_id %}{{ scrape_dates|json_script:scrape_id }}{% endwith %}
-{% with "comparison-data-"|add:chart_id as comp_id %}{{ city_comparison_data|json_script:comp_id }}{% endwith %}
-{% with "selected-cities-"|add:chart_id as city_id %}{{ selected_cities|json_script:city_id }}{% endwith %}
 <script type="text/javascript">
-  // Load data from safely encoded JSON script tags
-  const scrapeDates{{ chart_id }} = JSON.parse(document.getElementById('scrape-dates-{{ chart_id }}').textContent);
-  const rawData{{ chart_id }} = JSON.parse(document.getElementById('comparison-data-{{ chart_id }}').textContent);
-  const cityNames{{ chart_id }} = JSON.parse(document.getElementById('selected-cities-{{ chart_id }}').textContent);
+  const scrapeDates{{ chart_id }} = JSON.parse(document.getElementById('scrape-dates').textContent);
+  const rawData{{ chart_id }} = JSON.parse(document.getElementById('comparison-data').textContent);
+  const cityNames{{ chart_id }} = JSON.parse(document.getElementById('selected-cities').textContent);
 
-  // Group data by date for quick lookup
   const dataByDate{{ chart_id }} = {};
   rawData{{ chart_id }}.forEach(item => {
     const date = item.scraped_date;
     if (!dataByDate{{ chart_id }}[date]) {
       dataByDate{{ chart_id }}[date] = {
         offerTypes: [],
-        city1Prices: [],
-        city2Prices: []
+        cityPrices: {}
       };
+      cityNames{{ chart_id }}.forEach((_, idx) => {
+        dataByDate{{ chart_id }}[date].cityPrices[`city${idx + 1}`] = [];
+      });
     }
+
     dataByDate{{ chart_id }}[date].offerTypes.push(item.offer_type);
-    dataByDate{{ chart_id }}[date].city1Prices.push(item['{{ col1 }}'] ?? null);
-    dataByDate{{ chart_id }}[date].city2Prices.push(item['{{ col2 }}'] ?? null);
+    cityNames{{ chart_id }}.forEach((_, idx) => {
+      const colKey = '{{ col_prefix }}' + '_city_' + (idx + 1);
+      dataByDate{{ chart_id }}[date].cityPrices[`city${idx + 1}`].push(item[colKey] ?? null);
+    });
   });
 
   var ctx_{{ chart_id }} = document.getElementById('main-{{ chart_id }}').getContext('2d');
@@ -76,22 +75,26 @@
       return;
     }
 
+    const backgroundColors = [
+      'oklch(0.7445 0.1647 49.04 / 0.85)',
+      'oklch(0.6324 0.3379 306 / 84.71%)',
+      'oklch(0.58 0.3 200 / 0.8)',
+      'oklch(0.5 0.25 100 / 0.8)',
+      'oklch(0.6 0.3 250 / 0.8)',
+      'oklch(0.7 0.2 180 / 0.8)'
+    ];
+
+    const datasets = cityNames{{ chart_id }}.map((cityName, idx) => ({
+      label: cityName,
+      backgroundColor: backgroundColors[idx % backgroundColors.length],
+      data: d.cityPrices[`city${idx + 1}`]
+    }));
+
     const config = {
       type: 'bar',
       data: {
         labels: d.offerTypes,
-        datasets: [
-          {
-            label: cityNames{{ chart_id }}[0],
-            backgroundColor: 'oklch(0.7445 0.1647 49.04 / 0.85)',
-            data: d.city1Prices
-          },
-          {
-            label: cityNames{{ chart_id }}[1],
-            backgroundColor: 'oklch(0.6324 0.3379 306 / 84.71%)',
-            data: d.city2Prices
-          }
-        ]
+        datasets: datasets
       },
       options: {
         responsive: true,
@@ -146,11 +149,9 @@
     chart_{{ chart_id }} = new Chart(ctx_{{ chart_id }}, config);
   }
 
-  // On page load
   var selectElement = document.getElementById('date-select-{{ chart_id }}');
   updateChart{{ chart_id }}(selectElement.value);
 
-  // On change
   selectElement.addEventListener('change', function () {
     updateChart{{ chart_id }}(this.value);
   });

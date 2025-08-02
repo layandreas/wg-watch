@@ -5,6 +5,7 @@
   name: "dark";
   default: true;
   --color-primary: oklch(0.7445 0.1647 49.04);
+  --color-secondary: oklch(0.6324 0.3379 306);
   --color-base-100: oklch(0.1732 0.0388 238.66);
   --color-base-200: oklch(0.1532 0.0388 238.66);
   --color-base-300: oklch(0.1232 0.0388 238.66);
@@ -13,3 +14,4 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "./choicesjs.css"; 
