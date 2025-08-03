@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-  <div id="map" style="height: 500px;"></div>
+  <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
+    <p class="text-center">This map shows the locations of rental offers in the selected city.</p>
+  </div>
+  <div id="map" class="h-140"></div>
   <script>
-    var map = L.map('map').setView([51.505, -0.09], 13);
+    var map = L.map('map').setView([51.2277, 6.7735], 12);
   
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,

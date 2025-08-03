@@ -897,6 +897,24 @@
   .h-5 {
     height: calc(var(--spacing) * 5);
   }
+  .h-100 {
+    height: calc(var(--spacing) * 100);
+  }
+  .h-140 {
+    height: calc(var(--spacing) * 140);
+  }
+  .h-150 {
+    height: calc(var(--spacing) * 150);
+  }
+  .h-200 {
+    height: calc(var(--spacing) * 200);
+  }
+  .h-500 {
+    height: calc(var(--spacing) * 500);
+  }
+  .h-1500 {
+    height: calc(var(--spacing) * 1500);
+  }
   .h-\[50vh\] {
     height: 50vh;
   }
