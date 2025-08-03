@@ -31,3 +31,4 @@ dev = [
 
 [tool.ruff]
 line-length = 80
+ignore = ["F401"]

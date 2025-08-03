@@ -1,11 +1,15 @@
+import logging
+import multiprocessing
 import os
 
 import django
-import googlemaps
 from django.db import connection
+from googlemaps import Client as GoogleMapsClient
+
+logger = logging.getLogger(__name__)
 
 
-def format_address(address: dict) -> str:
+def _format_address(address: dict) -> str:
     address_formatted = (
         f"{address['street_address']}, {address['address_locality']}, "
         f"{address['address_region']}, {address['postal_code']}, "
@@ -15,7 +19,7 @@ def format_address(address: dict) -> str:
     return address_formatted
 
 
-def geocode_locations():
+def _load_addresses() -> list[dict]:
     query_select_addresses = """
 -- SQLite
 select distinct
@@ -46,30 +50,76 @@ where locations.street_address is null
         columns = [col[0] for col in cursor.description]
         rows = cursor.fetchall()
 
-    addresses = [dict(zip(columns, row)) for row in rows][:10]
+    addresses = [dict(zip(columns, row)) for row in rows]
 
-    gmaps = googlemaps.Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
+    return addresses
+
+
+def geocode_locations(
+    gmaps_client: GoogleMapsClient, addresses: list[dict]
+) -> None:
+    mp_logger = multiprocessing.get_logger()
+
+    from wgwatch.models import RealEstateLocation
 
     for address in addresses:
-        address = format_address(address)
+        address_formatted = _format_address(address)
         try:
-            geocode_result = gmaps.geocode(address)
+            geocode_result = gmaps_client.geocode(address_formatted)
             if geocode_result:
                 latitude = geocode_result[0]["geometry"]["location"]["lat"]
                 longitude = geocode_result[0]["geometry"]["location"]["lng"]
 
-                print(f"Geocoded: {address} -> ({latitude}, {longitude})")
+                mp_logger.info(
+                    f"Geocoded: {address_formatted} -> ({latitude}, {longitude})"
+                )
+
+                mp_logger.info(
+                    f"Saving location for address: {address_formatted}"
+                )
+                location_model = RealEstateLocation(
+                    street_address=address["street_address"],
+                    address_locality=address["address_locality"],
+                    address_region=address["address_region"],
+                    postal_code=address["postal_code"],
+                    address_country=address["address_country"],
+                    latitude=latitude,
+                    longitude=longitude,
+                )
+
+                location_model.save()
+
             else:
-                print(f"Failed to geocode: {address}")
+                mp_logger.error(f"Failed to geocode: {address}")
         except Exception as e:
-            print(f"Error for {address}: {e}")
+            mp_logger.error(f"Error for {address}: {e}")
+
+
+def init_django():
+    import os
+
+    os.environ["DJANGO_SETTINGS_MODULE"] = "wgwatch.settings"
+    django.setup()
 
 
 def main() -> None:
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wgwatch.settings")
-    django.setup()
+    logging.basicConfig(level=logging.INFO)
+    multiprocessing.log_to_stderr(logging.INFO)
 
-    geocode_locations()
+    gmaps_client = GoogleMapsClient(key=os.getenv("GOOGLE_MAPS_API_KEY"))
+    n_processes = 8
+
+    init_django()
+    addresses = _load_addresses()
+    logger.info(f"{len(addresses)} addresses loaded")
+
+    address_chunks = [addresses[i::n_processes] for i in range(n_processes)]
+    args = [(gmaps_client, chunk) for chunk in address_chunks]
+
+    with multiprocessing.Pool(
+        processes=n_processes, initializer=init_django
+    ) as pool:
+        pool.starmap(geocode_locations, args)
 
 
 if __name__ == "__main__":
