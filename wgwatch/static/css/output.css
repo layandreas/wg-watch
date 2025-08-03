@@ -1457,6 +1457,12 @@
 .choices__placeholder {
   opacity: .5;
 }
+:root {
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+[data-theme="dark"] .map-tiles {
+  filter: var(--map-tiles-filter, none);
+}
 @layer base {
   :where(:root),:root:has(input.theme-controller[value=light]:checked),[data-theme=light] {
     color-scheme: light;

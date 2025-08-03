@@ -44,6 +44,15 @@ def home(request):
 
 
 @require_http_methods(["GET"])
+def map(request):
+    return render(
+        request,
+        "map.html",
+        {},
+    )
+
+
+@require_http_methods(["GET"])
 def about(request):
     return render(
         request,
