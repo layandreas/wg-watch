@@ -50,11 +50,25 @@
   // Helper: interpolate color between green and red (green = cheap, red = expensive)
   // t is normalized [0,1], returns a hex color string
   function interpolateColor(t) {
-    const r = Math.round(0 + t * (255 - 0));   // 0->255
-    const g = Math.round(128 - t * 128);       // 128->0
-    const b = 0;
+    let r, g, b = 0;
+
+    if (t < 0.5) {
+      // Green to Yellow
+      const localT = t / 0.5;
+      r = Math.round(localT * 255);     // 0 → 255
+      g = 128 + Math.round(localT * 127); // 128 → 255
+      b = 0;
+    } else {
+      // Yellow to Red
+      const localT = (t - 0.5) / 0.5;
+      r = 255;
+      g = Math.round(255 - localT * 255); // 255 → 0
+      b = 0;
+    }
+
     return `rgb(${r},${g},${b})`;
   }
+
 
   listingsData.data.forEach(listing => {
     if (listing.latitude && listing.longitude && listing.price != null) {
