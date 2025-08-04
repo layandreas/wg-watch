@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
-    <p class="text-center">This map shows the locations of rental offers in the selected city.</p>
-  </div>
+  {% with "listings-with-locations" as listings_loc %}
+    {{ listings_with_locations|json_script:listings_loc }}
+  {% endwith %}
+  {% with "city-center-location" as city_center %}{{ city_center_location|json_script:city_center }}{% endwith %}
   <div id="city-form-wrapper">
     <form method="get" class="w-full">
       <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
-        <p class="text-center">Please select one or more cities from the dropdown menus below to compare rental prices.</p>
+        <p class="text-center">
+          This map shows the locations of rental offers in the selected city. Please select a city and offer type below.
+        </p>
       </div>
       <select id="citySelection"
               name="citySelection"
@@ -31,14 +34,25 @@
     </form>
     <div id="map" class="h-140"></div>
     <script>
-    var map = L.map('map').setView([51.2277, 6.7735], 12);
-  
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      className: 'map-tiles'
+      const cityCenterLocation = JSON.parse(document.getElementById('city-center-location').textContent);
+      var map = L.map('map').setView([cityCenterLocation.lat, cityCenterLocation.lon], cityCenterLocation.zoom);
+    
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        className: 'map-tiles'
+      }).addTo(map);
 
-  }).addTo(map);
+      const listingsData = JSON.parse(document.getElementById('listings-with-locations').textContent);
+
+      // Add a marker for each listing
+      listingsData.data.forEach(listing => {
+        if (listing.latitude && listing.longitude) {
+          L.marker([listing.latitude, listing.longitude])
+            .addTo(map)
+            .bindPopup(`<strong>${listing.name}</strong>`);
+        }
+      });
 
     </script>
   {% endblock content %}

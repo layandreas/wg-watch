@@ -9,7 +9,13 @@ from .dataloader import (
     load_scrape_dates,
 )
 from .models import RealEstateListing
-from .types import OfferType, SelectedCities, SelectedCity, SelectedOfferType
+from .types import (
+    CITY_CENTER_LOCATIONS,
+    OfferType,
+    SelectedCities,
+    SelectedCity,
+    SelectedOfferType,
+)
 
 
 @require_http_methods(["GET"])
@@ -63,6 +69,7 @@ def map(request):
     selected_city_validated = None
     selected_offer_type_validated = None
     listings_with_locations = None
+    city_center_locations = None
 
     if selected_city and selected_offer_type:
         selected_city_validated = SelectedCity(
@@ -77,6 +84,10 @@ def map(request):
             city=selected_city_validated.payload,
             offer_type=selected_offer_type_validated.payload,
         )
+
+        city_center_location = CITY_CENTER_LOCATIONS[
+            selected_city_validated.payload
+        ]
 
     return render(
         request,
@@ -95,8 +106,13 @@ def map(request):
                 else None
             ),
             "listings_with_locations": (
-                listings_with_locations.model_dump_json()
+                listings_with_locations.model_dump(mode="json")
                 if listings_with_locations
+                else None
+            ),
+            "city_center_location": (
+                city_center_location.model_dump(mode="json")
+                if city_center_location
                 else None
             ),
         },
