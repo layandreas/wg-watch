@@ -32,27 +32,28 @@
       </select>
       <button type="submit" class="btn btn-soft btn-primary w-full my-4">Submit</button>
     </form>
-    <div id="map" class="h-140"></div>
-    <script>
-      const cityCenterLocation = JSON.parse(document.getElementById('city-center-location').textContent);
-      var map = L.map('map').setView([cityCenterLocation.lat, cityCenterLocation.lon], cityCenterLocation.zoom);
-    
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        className: 'map-tiles'
-      }).addTo(map);
+    {% if selected_city is not None and selected_offer_type is not None %}
+      <div id="map" class="h-140"></div>
+      <script>
+        const cityCenterLocation = JSON.parse(document.getElementById('city-center-location').textContent);
+        var map = L.map('map').setView([cityCenterLocation.lat, cityCenterLocation.lon], cityCenterLocation.zoom);
+      
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          className: 'map-tiles'
+        }).addTo(map);
 
-      const listingsData = JSON.parse(document.getElementById('listings-with-locations').textContent);
+        const listingsData = JSON.parse(document.getElementById('listings-with-locations').textContent);
 
-      // Add a marker for each listing
-      listingsData.data.forEach(listing => {
-        if (listing.latitude && listing.longitude) {
-          L.marker([listing.latitude, listing.longitude])
-            .addTo(map)
-            .bindPopup(`<strong>${listing.name}</strong>`);
-        }
-      });
-
-    </script>
+        // Add a marker for each listing
+        listingsData.data.forEach(listing => {
+          if (listing.latitude && listing.longitude) {
+            L.marker([listing.latitude, listing.longitude])
+              .addTo(map)
+              .bindPopup(`<strong>${listing.name}</strong>`);
+          }
+        });
+      </script>
+    {% endif %}
   {% endblock content %}
