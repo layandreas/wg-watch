@@ -1,10 +1,7 @@
-import datetime
-from datetime import date
-from typing import Any, List
+from typing import Any
 
 from django.db import connection
 from jinja2 import Template
-from pydantic import BaseModel
 
 from .types import (
     City,
@@ -71,6 +68,8 @@ def load_listings_with_locations(
                     listing.address_locality,
                     listing.name,
                     listing.url,
+                    listing.price,
+                    listing.square_meters,
                     location.latitude,
                     location.longitude
 

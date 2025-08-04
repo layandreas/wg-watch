@@ -41,12 +41,14 @@ class ScrapeDates(BaseModel):
 
 
 class SingleRealEstateListingWithLocation(BaseModel):
-    street_address: str
-    address_locality: str
-    name: str
-    url: HttpUrl
-    latitude: float
-    longitude: float
+    street_address: str | None
+    address_locality: str | None
+    name: str | None
+    url: HttpUrl | None
+    price: float | None
+    square_meters: float | None
+    latitude: float | None
+    longitude: float | None
 
 
 class RealEstateListingsWithLocation(BaseModel):

@@ -52,7 +52,7 @@
           if (listing.latitude && listing.longitude) {
             L.marker([listing.latitude, listing.longitude])
               .addTo(map)
-              .bindPopup(`<strong>${listing.name}</strong>`);
+              .bindPopup(`<strong>${listing.name}</strong><br>Price: ${listing.price}€<br>Square meters: ${listing.square_meters}m²`);
           }
         });
     </script>
