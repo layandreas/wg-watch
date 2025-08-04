@@ -76,6 +76,29 @@
       `);
     }
   });
+
+// Add legend control
+const legend = L.control({ position: 'bottomright' });
+
+legend.onAdd = function (map) {
+  const div = L.DomUtil.create('div', 'info legend');
+  const grades = [0, 0.25, 0.5, 0.75, 1]; // normalized t values
+  const labels = [];
+
+  div.innerHTML += '<strong>Price Percentile</strong><br>';
+
+  grades.forEach(t => {
+    const color = interpolateColor(t);
+    const percentage = Math.round(t * 100);
+    div.innerHTML +=
+      `<i style="background:${color}; width: 18px; height: 18px; display: inline-block; margin-right: 6px;"></i> ${percentage}%<br>`;
+  });
+
+  return div;
+};
+
+legend.addTo(map);
+
     </script>
   {% endif %}
 {% endblock content %}
