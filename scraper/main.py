@@ -106,7 +106,7 @@ class ScraperConfig(BaseSettings):
         env_nested_delimiter="_", env_nested_max_split=1, env_prefix="SCRAPER_"
     )
 
-    city: Optional[City] = None
+    cities: Optional[list[City]] = None
     headless: bool = False
     start_at_page: int = 0
     max_concurrent: int = 3
@@ -329,7 +329,7 @@ async def main():
 
     config = ScraperConfig()
     cities: List[City] = (
-        [config.city] if config.city else list(city_to_id.keys())
+        config.cities if config.cities else list(city_to_id.keys())
     )
 
     sem = asyncio.Semaphore(config.max_concurrent)
