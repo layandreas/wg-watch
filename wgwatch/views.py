@@ -1,5 +1,6 @@
 from typing import get_args
 
+import numpy as np
 import pandas as pd
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
@@ -96,7 +97,7 @@ def map(request):
 
         listing_price_quantiles = (
             listings_with_locations_df["price"]
-            .quantile([0.2, 0.4, 0.6, 0.8])
+            .quantile(np.arange(0.05, 1, 0.05))
             .to_dict()
         )
 
