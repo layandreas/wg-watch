@@ -9,7 +9,7 @@ from .dataloader import (
     load_scrape_dates,
 )
 from .models import RealEstateListing
-from .types import OfferType, SelectedCities
+from .types import OfferType, SelectedCities, SelectedCity, SelectedOfferType
 
 
 @require_http_methods(["GET"])
@@ -58,11 +58,36 @@ def map(request):
     )
 
     offer_types = list(get_args(OfferType))
+    selected_city = request.GET.get("citySelection")
+    selected_offer_type = request.GET.get("offerSelection")
+    selected_city_validated = None
+    selected_offer_type_validated = None
+    listings_with_locations = None
+
+    if selected_city and selected_offer_type:
+        selected_city_validated = SelectedCity(
+            payload=request.GET.get("citySelection")
+        )
+
+        selected_offer_type_validated = SelectedOfferType(
+            payload=request.GET.get("offerSelection")
+        )
+
+        listings_with_locations = load_listings_with_locations(
+            city=selected_city_validated.payload,
+            offer_type=selected_offer_type_validated.payload,
+        )
 
     return render(
         request,
         "map.html",
-        {"cities": cities, "offer_types": offer_types},
+        {
+            "cities": cities,
+            "offer_types": offer_types,
+            "selected_city": selected_city_validated,
+            "selected_offer_type_validated": selected_offer_type_validated,
+            "listings_with_locations": listings_with_locations.model_dump_json(),
+        },
     )
 
 

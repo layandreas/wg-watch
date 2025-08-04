@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from .types import (
     City,
     OfferType,
-    RealEstateListingWithLocation,
+    RealEstateListingsWithLocation,
     ScrapeDates,
     SelectedCities,
 )
@@ -60,10 +60,8 @@ def load_scrape_dates() -> ScrapeDates:
 
 
 def load_listings_with_locations(
-    city: City, scrape_date: datetime.date, offer_type: OfferType
-) -> RealEstateListingWithLocation:
-    scrape_date_str = scrape_date.strftime("%Y-%m-%d")
-
+    city: City, offer_type: OfferType
+) -> RealEstateListingsWithLocation:
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -89,13 +87,17 @@ def load_listings_with_locations(
                 and listing.address_country = location.address_country
 
                 where listing.address_locality = %s
-                and date(listing.job_insert_time) = %s
                 and listing.offer_type = %s
                 and location.latitude is not null
                 and location.longitude is not null
+                and date(job_insert_time) = (
+                    select
+                        max(date(job_insert_time))
+                    from latest_realestatelisting_per_day
+                )
                 ;
         """,
-            [scrape_date_str, offer_type, city],
+            [city, offer_type],
         )
 
         rows = cursor.fetchall()
@@ -103,7 +105,7 @@ def load_listings_with_locations(
 
     listings_with_locations = [dict(zip(columns, row)) for row in rows]
     listings_with_locations_validated = (
-        RealEstateListingWithLocation.model_validate(
+        RealEstateListingsWithLocation.model_validate(
             {"data": listings_with_locations}
         )
     )

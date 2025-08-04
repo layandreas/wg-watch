@@ -8,11 +8,11 @@
       <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
         <p class="text-center">Please select one or more cities from the dropdown menus below to compare rental prices.</p>
       </div>
-      <select class="select w-full my-4">
+      <select id="citySelection" name="citySelection" class="select w-full my-4">
         <option disabled selected>Select a city</option>
         {% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}
       </select>
-      <select class="select w-full">
+      <select id="offerSelection" name="offerSelection" class="select w-full">
         <option disabled selected>Select an offer type</option>
         {% for offer_type in offer_types %}<option value="{{ offer_type }}">{{ offer_type }}</option>{% endfor %}
       </select>
