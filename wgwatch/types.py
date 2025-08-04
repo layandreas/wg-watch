@@ -49,6 +49,7 @@ class SingleRealEstateListingWithLocation(BaseModel):
     square_meters: float | None
     latitude: float | None
     longitude: float | None
+    price_rank_normalized: float | None
 
 
 class RealEstateListingsWithLocation(BaseModel):

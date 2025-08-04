@@ -62,38 +62,55 @@ def load_listings_with_locations(
     with connection.cursor() as cursor:
         cursor.execute(
             """
-                select
-
-                    listing.street_address,
-                    listing.address_locality,
-                    listing.name,
-                    listing.url,
-                    listing.price,
-                    listing.square_meters,
-                    location.latitude,
-                    location.longitude
-
-                from latest_realestatelisting_per_day
-                    as listing
-
-                left join wgwatch_realestatelocation
-                    as location
-
-                on listing.street_address = location.street_address
-                and listing.address_locality = location.address_locality
-                and listing.address_region = location.address_region
-                and listing.postal_code = location.postal_code
-                and listing.address_country = location.address_country
-
-                where listing.address_locality = %s
-                and listing.offer_type = %s
-                and location.latitude is not null
-                and location.longitude is not null
-                and date(job_insert_time) = (
+                with listings as (
                     select
-                        max(date(job_insert_time))
+
+                        listing.street_address,
+                        listing.address_locality,
+                        listing.name,
+                        listing.url,
+                        listing.price,
+                        listing.square_meters,
+
+                        location.latitude,
+                        location.longitude,
+
+                        rank() over (order by price) as price_rank,
+                        count(*) over () as n_listings
+
                     from latest_realestatelisting_per_day
+                        as listing
+
+                    left join wgwatch_realestatelocation
+                        as location
+
+                    on listing.street_address = location.street_address
+                    and listing.address_locality = location.address_locality
+                    and listing.address_region = location.address_region
+                    and listing.postal_code = location.postal_code
+                    and listing.address_country = location.address_country
+
+                    where listing.address_locality = %s
+                    and listing.offer_type = %s
+                    and location.latitude is not null
+                    and location.longitude is not null
+                    and date(job_insert_time) = (
+                        select
+                            max(date(job_insert_time))
+                        from latest_realestatelisting_per_day
+                    )
                 )
+
+                select 
+
+                    listings.*,
+
+                    (cast(listings.price_rank - 1 as float))
+                    / (listings.n_listings - 1)
+                        as price_rank_normalized    
+
+                from listings
+                    as listings
                 ;
         """,
             [city, offer_type],

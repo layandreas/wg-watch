@@ -4,7 +4,6 @@
     {{ listings_with_locations|json_script:listings_loc }}
   {% endwith %}
   {% with "city-center-location" as city_center %}{{ city_center_location|json_script:city_center }}{% endwith %}
-  {% with "price-quantiles" as price_quantiles %}{{ listing_price_quantiles|json_script:price_quantiles }}{% endwith %}
   <div id="city-form-wrapper">
     <form method="get" class="w-full">
       <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
@@ -38,7 +37,6 @@
     <div id="map" class="h-140"></div>
     <script>
   const cityCenterLocation = JSON.parse(document.getElementById('city-center-location').textContent);
-  const quantiles = JSON.parse(document.getElementById('price-quantiles').textContent);
   const listingsData = JSON.parse(document.getElementById('listings-with-locations').textContent);
 
   var map = L.map('map').setView([cityCenterLocation.lat, cityCenterLocation.lon], cityCenterLocation.zoom);
@@ -49,39 +47,32 @@
     className: 'map-tiles'
   }).addTo(map);
 
-  // Extract sorted quantile values (ascending)
-  const quantileValues = Object.values(quantiles).sort((a,b) => a-b);
-
   // Helper: interpolate color between green and red (green = cheap, red = expensive)
   // t is normalized [0,1], returns a hex color string
   function interpolateColor(t) {
-    const r = Math.round(0 + t * (255 - 0));   // 0->255
-    const g = Math.round(128 - t * 128);       // 128->0
-    const b = 0;
+    let r, g, b = 0;
+
+    if (t < 0.5) {
+      // Green to Yellow
+      const localT = t / 0.5;
+      r = Math.round(localT * 255);     // 0 → 255
+      g = 128 + Math.round(localT * 127); // 128 → 255
+      b = 0;
+    } else {
+      // Yellow to Red
+      const localT = (t - 0.5) / 0.5;
+      r = 255;
+      g = Math.round(255 - localT * 255); // 255 → 0
+      b = 0;
+    }
+
     return `rgb(${r},${g},${b})`;
   }
 
-  // Determine the quantile position for a price
-  // Returns a value t in [0,1] based on where price falls in quantile intervals
-  function getColorPosition(price) {
-    if (price <= quantileValues[0]) return 0;      // cheapest
-    if (price >= quantileValues[quantileValues.length -1]) return 1; // most expensive
-
-    for (let i=0; i < quantileValues.length - 1; i++) {
-      const lower = quantileValues[i];
-      const upper = quantileValues[i+1];
-      if (price >= lower && price < upper) {
-        // Normalize between lower and upper quantile
-        return (i + (price - lower) / (upper - lower)) / (quantileValues.length - 1);
-      }
-    }
-    return 1; // fallback
-  }
 
   listingsData.data.forEach(listing => {
     if (listing.latitude && listing.longitude && listing.price != null) {
-      const t = getColorPosition(listing.price);
-      const color = interpolateColor(t);
+      const color = interpolateColor(listing.price_rank_normalized);
 
       // Use circle marker with color fill
       L.circleMarker([listing.latitude, listing.longitude], {
@@ -94,10 +85,34 @@
       }).addTo(map).bindPopup(`
         <strong>${listing.name}</strong><br>
         Price: ${listing.price}€<br>
-        Square meters: ${listing.square_meters}m²
+        Square meters: ${listing.square_meters}m²<br>
+        <a href="${listing.url}" target="_blank">Open listing</a>
       `);
     }
   });
+
+// Add legend control
+const legend = L.control({ position: 'bottomright' });
+
+legend.onAdd = function (map) {
+  const div = L.DomUtil.create('div', 'info legend');
+  const grades = [0, 0.25, 0.5, 0.75, 1]; // normalized t values
+  const labels = [];
+
+  div.innerHTML += '<strong>Price Percentile</strong><br>';
+
+  grades.forEach(t => {
+    const color = interpolateColor(t);
+    const percentage = Math.round(t * 100);
+    div.innerHTML +=
+      `<i style="background:${color}; width: 18px; height: 18px; display: inline-block; margin-right: 6px;"></i> ${percentage}%<br>`;
+  });
+
+  return div;
+};
+
+legend.addTo(map);
+
     </script>
   {% endif %}
 {% endblock content %}

@@ -24,3 +24,13 @@
 [data-theme="dark"] .map-tiles {
   filter: var(--map-tiles-filter, none);
 }
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+    box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+}
+
+.leaflet-container a {
+    color: var(--color-primary);
+}

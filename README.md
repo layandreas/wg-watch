@@ -30,9 +30,9 @@ uv sync
 Then run the scraper via:
 
 ```sh
-# SCRAPER_CITY is optional, if not set all 10 cities
+# SCRAPER_CITIES is optional, if not set all 10 cities
 # will be crawled
-SCRAPER_CITY="Stuttgart" python -m scraper.main;
+SCRAPER_CITIES='["Hamburg", "Muenchen", "Berlin"]' python -m scraper.main;
 ```
 
 where city is one of:
