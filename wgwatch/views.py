@@ -1,5 +1,6 @@
 from typing import get_args
 
+import pandas as pd
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
@@ -89,6 +90,16 @@ def map(request):
             selected_city_validated.payload
         ]
 
+        listings_with_locations_df = pd.DataFrame(
+            listings_with_locations.model_dump()["data"]
+        )
+
+        listing_price_quantiles = (
+            listings_with_locations_df["price"]
+            .quantile([0.2, 0.4, 0.6, 0.8])
+            .to_dict()
+        )
+
     return render(
         request,
         "map.html",
@@ -115,6 +126,7 @@ def map(request):
                 if city_center_location
                 else None
             ),
+            "listing_price_quantiles": listing_price_quantiles,
         },
     )
 
