@@ -84,9 +84,21 @@ def map(request):
         {
             "cities": cities,
             "offer_types": offer_types,
-            "selected_city": selected_city_validated,
-            "selected_offer_type_validated": selected_offer_type_validated,
-            "listings_with_locations": listings_with_locations.model_dump_json(),
+            "selected_city": (
+                selected_city_validated.payload
+                if selected_city_validated
+                else None
+            ),
+            "selected_offer_type": (
+                selected_offer_type_validated.payload
+                if selected_offer_type_validated
+                else None
+            ),
+            "listings_with_locations": (
+                listings_with_locations.model_dump_json()
+                if listings_with_locations
+                else None
+            ),
         },
     )
 
