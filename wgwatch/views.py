@@ -1,7 +1,5 @@
 from typing import get_args
 
-import numpy as np
-import pandas as pd
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
@@ -72,7 +70,6 @@ def map(request):
     selected_offer_type_validated = None
     listings_with_locations = None
     city_center_location = None
-    listing_price_quantiles = None
 
     if selected_city and selected_offer_type:
         selected_city_validated = SelectedCity(
@@ -91,16 +88,6 @@ def map(request):
         city_center_location = CITY_CENTER_LOCATIONS[
             selected_city_validated.payload
         ]
-
-        listings_with_locations_df = pd.DataFrame(
-            listings_with_locations.model_dump()["data"]
-        )
-        if listings_with_locations_df.shape[0] > 0:
-            listing_price_quantiles = (
-                listings_with_locations_df["price"]
-                .quantile(np.arange(0.05, 1, 0.05))
-                .to_dict()
-            )
 
     return render(
         request,
@@ -128,7 +115,6 @@ def map(request):
                 if city_center_location
                 else None
             ),
-            "listing_price_quantiles": listing_price_quantiles,
         },
     )
 
