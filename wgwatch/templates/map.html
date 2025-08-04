@@ -36,83 +36,84 @@
   {% if selected_city is not None and selected_offer_type is not None %}
     <div id="map" class="h-140"></div>
     <script>
-  const cityCenterLocation = JSON.parse(document.getElementById('city-center-location').textContent);
-  const listingsData = JSON.parse(document.getElementById('listings-with-locations').textContent);
+        const cityCenterLocation = JSON.parse(document.getElementById('city-center-location').textContent);
+        const listingsData = JSON.parse(document.getElementById('listings-with-locations').textContent);
 
-  var map = L.map('map').setView([cityCenterLocation.lat, cityCenterLocation.lon], cityCenterLocation.zoom);
+        var map = L.map('map').setView([cityCenterLocation.lat, cityCenterLocation.lon], cityCenterLocation.zoom);
 
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    className: 'map-tiles'
-  }).addTo(map);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            className: 'map-tiles'
+        }).addTo(map);
 
-  // Helper: interpolate color between green and red (green = cheap, red = expensive)
-  // t is normalized [0,1], returns a hex color string
-  function interpolateColor(t) {
-    let r, g, b = 0;
+        // Helper: interpolate color between green and red (green = cheap, red = expensive)
+        // t is normalized [0,1], returns a hex color string
+        function interpolateColor(t) {
+            let r, g, b = 0;
 
-    if (t < 0.5) {
-      // Green to Yellow
-      const localT = t / 0.5;
-      r = Math.round(localT * 255);     // 0 → 255
-      g = 128 + Math.round(localT * 127); // 128 → 255
-      b = 0;
-    } else {
-      // Yellow to Red
-      const localT = (t - 0.5) / 0.5;
-      r = 255;
-      g = Math.round(255 - localT * 255); // 255 → 0
-      b = 0;
-    }
+            if (t < 0.5) {
+                // Green to Yellow
+                const localT = t / 0.5;
+                r = Math.round(localT * 255); // 0 → 255
+                g = 128 + Math.round(localT * 127); // 128 → 255
+                b = 0;
+            } else {
+                // Yellow to Red
+                const localT = (t - 0.5) / 0.5;
+                r = 255;
+                g = Math.round(255 - localT * 255); // 255 → 0
+                b = 0;
+            }
 
-    return `rgb(${r},${g},${b})`;
-  }
+            return `rgb(${r},${g},${b})`;
+        }
 
 
-  listingsData.data.forEach(listing => {
-    if (listing.latitude && listing.longitude && listing.price != null) {
-      const color = interpolateColor(listing.price_rank_normalized);
+        listingsData.data.forEach(listing => {
+            if (listing.latitude && listing.longitude && listing.price != null) {
+                const color = interpolateColor(listing.price_rank_normalized);
 
-      // Use circle marker with color fill
-      L.circleMarker([listing.latitude, listing.longitude], {
-        radius: 8,
-        fillColor: color,
-        color: '#000',
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).addTo(map).bindPopup(`
+                // Use circle marker with color fill
+                L.circleMarker([listing.latitude, listing.longitude], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map).bindPopup(`
         <strong>${listing.name}</strong><br>
         Price: ${listing.price}€<br>
         Square meters: ${listing.square_meters}m²<br>
         <a href="${listing.url}" target="_blank">Open listing</a>
       `);
-    }
-  });
+            }
+        });
 
-// Add legend control
-const legend = L.control({ position: 'bottomright' });
+        // Add legend control
+        const legend = L.control({
+            position: 'bottomright'
+        });
 
-legend.onAdd = function (map) {
-  const div = L.DomUtil.create('div', 'info legend');
-  const grades = [0, 0.25, 0.5, 0.75, 1]; // normalized t values
-  const labels = [];
+        legend.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            const grades = [0, 0.25, 0.5, 0.75, 1]; // normalized t values
+            const labels = [];
 
-  div.innerHTML += '<strong>Price Percentile</strong><br>';
+            div.innerHTML += '<strong>Price Percentile</strong><br>';
 
-  grades.forEach(t => {
-    const color = interpolateColor(t);
-    const percentage = Math.round(t * 100);
-    div.innerHTML +=
-      `<i style="background:${color}; width: 18px; height: 18px; display: inline-block; margin-right: 6px;"></i> ${percentage}%<br>`;
-  });
+            grades.forEach(t => {
+                const color = interpolateColor(t);
+                const percentage = Math.round(t * 100);
+                div.innerHTML +=
+                    `<i style="background:${color}; width: 18px; height: 18px; display: inline-block; margin-right: 6px;"></i> ${percentage}%<br>`;
+            });
 
-  return div;
-};
+            return div;
+        };
 
-legend.addTo(map);
-
+        legend.addTo(map);
     </script>
   {% endif %}
 {% endblock content %}
