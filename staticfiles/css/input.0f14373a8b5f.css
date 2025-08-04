@@ -1,0 +1,26 @@
+@import url("tailwindcss.8c925bec7f6d") source(none);
+@plugin "./daisyui.js";
+@source "../../templates";
+@plugin "./daisyui-theme" {
+  name: "dark";
+  default: true;
+  --color-primary: oklch(0.7445 0.1647 49.04);
+  --color-secondary: oklch(0.6324 0.3379 306);
+  --color-base-100: oklch(0.1732 0.0388 238.66);
+  --color-base-200: oklch(0.1532 0.0388 238.66);
+  --color-base-300: oklch(0.1232 0.0388 238.66);
+}
+/* Adjusting font sizes for better readability on mobile devices */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url("./choicesjs.3d69b8551430.css"); 
+@import url("./leaflet.f18ae622e307.css"); 
+
+:root {
+    --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+[data-theme="dark"] .map-tiles {
+  filter: var(--map-tiles-filter, none);
+}

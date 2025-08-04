@@ -34,6 +34,7 @@
           Alpine.store('chartsChangeThemeCallbackList', []);
       })
     </script>
+    <script src="{% static 'js/leaflet.js' %}"></script>
   </head>
   <body tabindex="0" class="flex flex-col h-dvh w-screen">
     <div class="navbar bg-base-300 shadow-sm">
@@ -52,6 +53,9 @@
               class="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm">
             <li>
               <a onclick="document.activeElement.blur()" href="{% url 'home' %}">Dashboard</a>
+            </li>
+            <li>
+              <a onclick="document.activeElement.blur()" href="{% url 'map' %}">Map</a>
             </li>
             <li>
               <a onclick="document.activeElement.blur()" href="{% url 'about' %}">About</a>

@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="text-justify">
-        This page is based on publicly available data from <a target="_blank"
+    <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
+        <p class="text-justify">
+            This page is based on publicly available data from <a target="_blank"
     rel="noopener noreferrer"
     href="https://www.wg-gesucht.de/"
     class="link link-primary">wg-gesucht.de</a>,
-        an appartment rental website which is popular in Germany. It's based on an one-off project to scrape
-        rental websites to collect latest rental data. The data is not scraped on an ongoing basis.
+            an appartment rental website which is popular in Germany. It's based on an one-off project to scrape
+            rental websites to collect latest rental data. The data is not scraped on an ongoing basis.
+            Check out <a target="_blank"
+    rel="noopener noreferrer"
+    href="https://layandreas.github.io/personal-blog/posts/scraping-wg-gesucht-part-i/"
+    class="link link-primary">this blog post</a> for details.
+        </p>
     </div>
 {% endblock content %}

@@ -1,39 +1,20 @@
-import datetime
-from datetime import date
-from typing import List
+from typing import Any
 
 from django.db import connection
 from jinja2 import Template
-from pydantic import BaseModel
 
-from .types import SelectedCities
-
-
-class CityComparisonItem(BaseModel):
-    scraped_date: date
-    offer_type: str | None
-    avg_price_city_1: float | None
-    avg_price_city_2: float | None
-    number_of_listings_city_1: int | None
-    number_of_listings_city_2: int | None
-    avg_square_meters_city_1: float | None
-    avg_square_meters_city_2: float | None
-    avg_price_per_square_meter_city_1: float | None
-    avg_price_per_square_meter_city_2: float | None
-
-
-# If you want a model for the whole list:
-class CityComparisonData(BaseModel):
-    data: List[CityComparisonItem]
-
-
-class ScrapeDates(BaseModel):
-    data: List[datetime.date]
+from .types import (
+    City,
+    OfferType,
+    RealEstateListingsWithLocation,
+    ScrapeDates,
+    SelectedCities,
+)
 
 
 def load_city_comparison_data(
     selected_cities: SelectedCities,
-) -> CityComparisonData:
+) -> list[dict[str, Any]]:
     with open("input/sql/city_comparison.sql") as f:
         raw_template = f.read()
 
@@ -73,5 +54,59 @@ def load_scrape_dates() -> ScrapeDates:
     scrape_dates_validated = ScrapeDates.model_validate({"data": scrape_dates})
 
     return scrape_dates_validated
-    return scrape_dates_validated
-    return scrape_dates_validated
+
+
+def load_listings_with_locations(
+    city: City, offer_type: OfferType
+) -> RealEstateListingsWithLocation:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+                select
+
+                    listing.street_address,
+                    listing.address_locality,
+                    listing.name,
+                    listing.url,
+                    listing.price,
+                    listing.square_meters,
+                    location.latitude,
+                    location.longitude
+
+                from latest_realestatelisting_per_day
+                    as listing
+
+                left join wgwatch_realestatelocation
+                    as location
+
+                on listing.street_address = location.street_address
+                and listing.address_locality = location.address_locality
+                and listing.address_region = location.address_region
+                and listing.postal_code = location.postal_code
+                and listing.address_country = location.address_country
+
+                where listing.address_locality = %s
+                and listing.offer_type = %s
+                and location.latitude is not null
+                and location.longitude is not null
+                and date(job_insert_time) = (
+                    select
+                        max(date(job_insert_time))
+                    from latest_realestatelisting_per_day
+                )
+                ;
+        """,
+            [city, offer_type],
+        )
+
+        rows = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+
+    listings_with_locations = [dict(zip(columns, row)) for row in rows]
+    listings_with_locations_validated = (
+        RealEstateListingsWithLocation.model_validate(
+            {"data": listings_with_locations}
+        )
+    )
+
+    return listings_with_locations_validated

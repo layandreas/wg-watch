@@ -35,3 +35,14 @@ class RealEstateListing(models.Model):
 
     def __str__(self) -> str:
         return self.name or f"Listing #{self.id}"
+
+
+class RealEstateLocation(models.Model):
+    street_address = models.CharField(max_length=255, null=True, blank=True)
+    address_locality = models.CharField(max_length=100, null=True, blank=True)
+    address_region = models.CharField(max_length=100, null=True, blank=True)
+    postal_code = models.CharField(max_length=20, null=True, blank=True)
+    address_country = models.CharField(max_length=100, null=True, blank=True)
+
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
