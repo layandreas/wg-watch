@@ -72,6 +72,7 @@ def map(request):
     selected_offer_type_validated = None
     listings_with_locations = None
     city_center_location = None
+    listing_price_quantiles = None
 
     if selected_city and selected_offer_type:
         selected_city_validated = SelectedCity(
