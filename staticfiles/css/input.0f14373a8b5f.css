@@ -1,4 +1,4 @@
-@import "tailwindcss" source(none);
+@import url("tailwindcss.8c925bec7f6d") source(none);
 @plugin "./daisyui.js";
 @source "../../templates";
 @plugin "./daisyui-theme" {
@@ -14,8 +14,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "./choicesjs.css"; 
-@import "./leaflet.css"; 
+@import url("./choicesjs.3d69b8551430.css"); 
+@import url("./leaflet.f18ae622e307.css"); 
 
 :root {
     --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);

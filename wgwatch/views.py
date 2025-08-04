@@ -95,12 +95,12 @@ def map(request):
         listings_with_locations_df = pd.DataFrame(
             listings_with_locations.model_dump()["data"]
         )
-
-        listing_price_quantiles = (
-            listings_with_locations_df["price"]
-            .quantile(np.arange(0.05, 1, 0.05))
-            .to_dict()
-        )
+        if listings_with_locations_df.shape[0] > 0:
+            listing_price_quantiles = (
+                listings_with_locations_df["price"]
+                .quantile(np.arange(0.05, 1, 0.05))
+                .to_dict()
+            )
 
     return render(
         request,

@@ -1752,12 +1752,12 @@ svg.leaflet-zoom-animated {
   border-radius: 5px;
 }
 .leaflet-control-layers-toggle {
-  background-image: url(images/layers.png);
+  background-image: url("images/layers.a6137456ed16.png");
   width: 36px;
   height: 36px;
 }
 .leaflet-retina .leaflet-control-layers-toggle {
-  background-image: url(images/layers-2x.png);
+  background-image: url("images/layers-2x.4f0283c6ce28.png");
   background-size: 26px 26px;
 }
 .leaflet-touch .leaflet-control-layers-toggle {
@@ -1797,7 +1797,7 @@ svg.leaflet-zoom-animated {
   margin: 5px -10px 5px -6px;
 }
 .leaflet-default-icon-path {
-  background-image: url(images/marker-icon.png);
+  background-image: url("images/marker-icon.2273e3d8ad92.png");
 }
 .leaflet-container .leaflet-control-attribution {
   background: #fff;
