@@ -1,9 +1,15 @@
+from typing import get_args
+
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
-from .dataloader import load_city_comparison_data, load_scrape_dates
+from .dataloader import (
+    load_city_comparison_data,
+    load_listings_with_locations,
+    load_scrape_dates,
+)
 from .models import RealEstateListing
-from .types import SelectedCities
+from .types import OfferType, SelectedCities
 
 
 @require_http_methods(["GET"])
@@ -45,10 +51,18 @@ def home(request):
 
 @require_http_methods(["GET"])
 def map(request):
+    cities = (
+        RealEstateListing.objects.values_list("address_locality", flat=True)
+        .distinct()
+        .order_by("address_locality")
+    )
+
+    offer_types = list(get_args(OfferType))
+
     return render(
         request,
         "map.html",
-        {},
+        {"cities": cities, "offer_types": offer_types},
     )
 
 

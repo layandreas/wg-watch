@@ -3,8 +3,23 @@
   <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
     <p class="text-center">This map shows the locations of rental offers in the selected city.</p>
   </div>
-  <div id="map" class="h-140"></div>
-  <script>
+  <div id="city-form-wrapper">
+    <form method="get" class="w-full">
+      <div class="mb-4 p-4 bg-base-200 rounded-lg shadow-sm">
+        <p class="text-center">Please select one or more cities from the dropdown menus below to compare rental prices.</p>
+      </div>
+      <select class="select w-full my-4">
+        <option disabled selected>Select a city</option>
+        {% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}
+      </select>
+      <select class="select w-full">
+        <option disabled selected>Select an offer type</option>
+        {% for offer_type in offer_types %}<option value="{{ offer_type }}">{{ offer_type }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn btn-soft btn-primary w-full my-4">Submit</button>
+    </form>
+    <div id="map" class="h-140"></div>
+    <script>
     var map = L.map('map').setView([51.2277, 6.7735], 12);
   
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -14,5 +29,5 @@
 
   }).addTo(map);
 
-  </script>
-{% endblock content %}
+    </script>
+  {% endblock content %}
