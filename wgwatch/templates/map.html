@@ -71,7 +71,8 @@
       }).addTo(map).bindPopup(`
         <strong>${listing.name}</strong><br>
         Price: ${listing.price}€<br>
-        Square meters: ${listing.square_meters}m²
+        Square meters: ${listing.square_meters}m²<br>
+        <a href="${listing.url}" target="_blank">Open listing</a>
       `);
     }
   });
